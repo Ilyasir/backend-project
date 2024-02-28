@@ -10,17 +10,20 @@ def parser(url:str):
     soup = BeautifulSoup(res.text, "lxml")
     items = soup.find_all("a", class_="t") #Ищем все позиции комплектующих данного типа
     for item in items:
-        with psycopg2.connect(dbname='testdb', user='postgres', password='1502') as conn:
-            with conn.cursor() as curs:
-                for i in CPU_exceptions:
-                    if i in item.get_text():
-                        break
-                else:
-                    info_parser("https://www.nix.ru" + item["href"])
-                    # curs.execute("INSERT INTO components2 (id, name, type, image) VALUES (%s, %s, %s, %s);",(id, "Оперативная память", "DDR5", images[0]))
-                    id += 1
+        try:
+            with psycopg2.connect(dbname='****', user='****', password='****') as conn:
+                with conn.cursor() as curs:
+                    for i in CPU_exceptions:
+                        if i in item.get_text():
+                            break
+                    else:
+                        info_parser("https://www.nix.ru" + item["href"])
+                        # curs.execute("INSERT INTO components2 (id, name, type, image) VALUES (%s, %s, %s, %s);",(id, "Оперативная память", "DDR5", images[0]))
+                        id += 1
+        except DB_connection_exception:
+            print("Не получилось подключиться к базе данных")
 
-def info_parser(url:str):
+def cpu_info_parser(url:str):
     res_info = requests.get(url)
     soup_info = BeautifulSoup(res_info.text, "lxml")
     container = soup_info.find_all("span", class_="carousel-content") #Контейнер с изображениями (контейнера нет, если изображение одно)
