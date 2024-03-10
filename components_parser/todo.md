@@ -5,9 +5,6 @@
     <li>
         Make dicts:
         <ul>
-            <li>RAM</li>
-            <li>Motherboard</li>
-            <li>SSD</li>
             <li>Powers</li>
             <li>SSDs</li>
             <li>3.5"</li>
