@@ -6,16 +6,17 @@ from alembic import context
 # Чтобы работали абсолютные импорты из папки app
 import sys
 from os.path import abspath, dirname
-sys.path.insert(0, dirname(dirname(dirname(abspath(__file__))))) #
+sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 # Импортируем Base, записываем в Base метаданные про таблицы из models
 from app.config import settings
 from app.database import Base
-from app.PCs.models import PC
+from app.pc.models import pc, cpu
+from app.users.models import User
 
 config = context.config
 # Засетили адрес базы данных, чтобы alembic понимал с какой базой данных сравнивать
-config.set_main_option("sqlalchemy.url", f"{settings.DATABASE_URL}?async_fallback=True") #
+config.set_main_option("sqlalchemy.url", f"{settings.DATABASE_URL}?async_fallback=True")
 
 
 if config.config_file_name is not None:
