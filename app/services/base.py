@@ -10,7 +10,7 @@ class BaseService:
     @classmethod # Чтобы не создавать каждый раз экземпляр класса
     async def find_all(cls, **filter_by):
         async with async_session_maker() as session:
-            query = select(cls.model).filter_by(**filter_by) # Запрос, который возвращает PC по фильтрам
+            query = select(cls.model).filter_by(**filter_by) # Запрос, который возвращает строки по фильтрам
             result = await session.execute(query) # Исполняет запрос
             return result.mappings().all() # Возвращает все записи в JSON
     
