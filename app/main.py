@@ -1,8 +1,8 @@
-from fastapi import FastAPI, Query
-from pydantic import BaseModel
+from fastapi import FastAPI
 
-# Импортируем роутер
+# Импортируем роутеры
 from app.pc.router import router as router_pcs
+from app.users.router import router as router_users
 
 app = FastAPI()
 
