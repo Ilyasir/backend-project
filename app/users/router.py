@@ -29,7 +29,7 @@ async def login_user(response: Response, user_data: SUserAuth):
     if not user: # Если такого пользователя нет
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     # Создаём токен JWT
-    access_token = create_access_token({"sub": user.id})
+    access_token = create_access_token({"sub": str(user.id)})
     # Отправляем в cokkie
     response.set_cookie("pc_access_token", access_token, httponly=True)
     return {"access_token": access_token}
