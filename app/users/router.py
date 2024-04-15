@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, status, Response
+from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from app.users.schemas import SUserAuth
 from app.users.service import UsersService
 from app.users.auth import get_password_hash
 from app.users.auth import authenticate_user
 from app.users.auth import create_access_token
+from app.users.dependencies import get_current_user
+from app.users.models import User
 
 router = APIRouter(
     prefix="/auth",
@@ -32,4 +34,15 @@ async def login_user(response: Response, user_data: SUserAuth):
     access_token = create_access_token({"sub": str(user.id)})
     # Отправляем в cokkie
     response.set_cookie("pc_access_token", access_token, httponly=True)
-    return {"access_token": access_token}
+    return "Пользователь вошёл", {"access_token": access_token}
+
+# Эндпоинт для выхода пользователя
+@router.post("/logout")
+async def logout_user(response: Response):
+    response.delete_cookie("pc_access_token")
+    return "Пользователь вышел"
+
+# Эндпоинт выводит информацию о пользователе
+@router.get("/me")
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return current_user
