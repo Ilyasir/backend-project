@@ -30,6 +30,6 @@ async def authenticate_user(email: EmailStr, password: str):
     user = await UsersService.find_one_or_none(email=email)
     if not user:
         return None
-    if not verify_password(password, user.password):
+    if not verify_password(password, user.hashed_password):
         return None
     return user

@@ -11,7 +11,7 @@ sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 # Импортируем Base, записываем в Base метаданные про таблицы из models
 from app.config import settings
 from app.database import Base
-from app.pc.models import pc, cpu
+from app.userPc.models import UserPc
 from app.users.models import User
 
 config = context.config

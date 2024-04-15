@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Response, Depends
 
 from app.users.schemas import SUserAuth
+from app.users.schemas import SUserReg
 from app.users.service import UsersService
 from app.users.auth import get_password_hash
 from app.users.auth import authenticate_user
@@ -16,13 +17,13 @@ router = APIRouter(
 
 # Эндпоинт для регистрации пользователя
 @router.post("/register")
-async def register_user(user_data: SUserAuth):
+async def register_user(user_data: SUserReg):
     # Находим юзера по email
     existing_user = await UsersService.find_one_or_none(email=user_data.email)
     if existing_user: # Если он уже есть в БД, то выводим ошибку
         raise UserAlreadyExistsException
     hashed_password = get_password_hash(user_data.password) # Создаём хэшированный пароль
-    await UsersService.add(email=user_data.email, hashed_password=hashed_password)
+    await UsersService.add(email=user_data.email, hashed_password=hashed_password, username=user_data.username)
     return 'Пользователь зарегистрирован', await UsersService.find_one_or_none(email=user_data.email)
 
 # Эндпоинт для входа пользователя
@@ -34,13 +35,13 @@ async def login_user(response: Response, user_data: SUserAuth):
     # Создаём токен JWT
     access_token = create_access_token({"sub": str(user.id)})
     # Отправляем в cokkie
-    response.set_cookie("pc_access_token", access_token, httponly=True)
+    response.set_cookie("userpc_access_token", access_token, httponly=True)
     return "Пользователь вошёл", {"access_token": access_token}
 
 # Эндпоинт для выхода пользователя
 @router.post("/logout")
 async def logout_user(response: Response):
-    response.delete_cookie("pc_access_token")
+    response.delete_cookie("userpc_access_token")
     return "Пользователь вышел"
 
 # Эндпоинт выводит информацию о пользователе

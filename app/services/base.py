@@ -12,7 +12,7 @@ class BaseService:
         async with async_session_maker() as session:
             query = select(cls.model).filter_by(**filter_by) # Запрос, который возвращает строки по фильтрам
             result = await session.execute(query) # Исполняет запрос
-            return result.mappings().all() # Возвращает все записи в JSON
+            return result.scalars().all() # Возвращает все записи в JSON
     
     @classmethod
     async def find_one_or_none(cls, **filter_by):

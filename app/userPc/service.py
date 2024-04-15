@@ -4,8 +4,8 @@
 from app.services.base import BaseService
 
 # Импортируем модели
-from app.pc.models import pc
+from app.userPc.models import UserPc
 
 class PCService(BaseService): # Наследуемся от класса BaseService
-    model = pc
+    model = UserPc
     

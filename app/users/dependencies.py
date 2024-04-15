@@ -7,7 +7,7 @@ from app.config import settings
 from app.exсeptions import TokenExpiredException, TokenAbsentException, IncorrectTokenFormatException, UserIsNotInToken
 
 def get_token(request: Request):
-    token = request.cookies.get("pc_access_token")
+    token = request.cookies.get("userpc_access_token")
     if not token:
         raise TokenAbsentException
     return token

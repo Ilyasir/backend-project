@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 # Импортируем роутеры
-from app.pc.router import router as router_pcs
+from app.userPc.router import router as router_pcs
 from app.users.router import router as router_users
 
 app = FastAPI()
