@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, Float, String, Boolean
+from sqlalchemy import Column, ForeignKey, Integer
 from app.database import Base
 
 class UserPc(Base):
