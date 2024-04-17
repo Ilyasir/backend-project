@@ -14,7 +14,8 @@ from app.database import Base
 from app.components.characteristics.models import Characteristic
 from app.components.models import Component
 from app.users.models import User
-from app.userPc.models import UserPc
+from app.userPc.models import UserPc, UserPcComponent
+from app.readyPc.models import ReadyPc, ReadyPcComponent
 
 
 

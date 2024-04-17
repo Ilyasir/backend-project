@@ -1,13 +1,15 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Enum
+from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.orm import relationship
 from app.database import Base
+from app.components.characteristics.models import Characteristic
 
 class Component(Base):
     __tablename__ = "component"
 
     id = Column(Integer, primary_key=True)
-    pc_id = Column(Integer, ForeignKey("user_pc.id"))
-    type = Column(Enum('cpu', 'gpu', 'motherboard','ram', 'memory', 'power', 'cooler', 'case', name='component_types'), nullable=False)
+    type = Column(Enum('cpu', 'gpu', 'md','ram', 'memory', 'power', 'cooler', 'case', name='component_types'), nullable=False)
     name = Column(String, nullable=False)
-    description = Column(String, nullable=True)
     price = Column(String, nullable=False)
-    image_path = Column(String, nullable=True)
+    description = Column(String)
+    image_path = Column(String)
+    characteristic = relationship("Characteristic", back_populates="component")
