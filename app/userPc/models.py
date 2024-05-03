@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.components.models import Component
@@ -7,6 +7,7 @@ class UserPc(Base):
     __tablename__ = "user_pc"
 
     id = Column(Integer, primary_key=True)
+    name = Column(String, nullable= False)
     user_id = Column(Integer, ForeignKey("user.id"))
     price = Column(Integer, nullable=False)
     user = relationship("User", back_populates="user_pc")

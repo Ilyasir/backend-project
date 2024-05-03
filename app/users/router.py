@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["Auth & Пользователи"],
 )
 
-# Эндпоинт для регистрации пользователя
+# Роутер для регистрации пользователя
 @router.post("/register")
 async def register_user(user_data: SUserReg):
     # Находим юзера по email
@@ -26,7 +26,7 @@ async def register_user(user_data: SUserReg):
     await UsersService.add(email=user_data.email, hashed_password=hashed_password, username=user_data.username)
     return 'Пользователь зарегистрирован', await UsersService.find_one_or_none(email=user_data.email)
 
-# Эндпоинт для входа пользователя
+# Роутер для входа пользователя
 @router.post("/login")
 async def login_user(response: Response, user_data: SUserAuth):
     user = await authenticate_user(user_data.email, user_data.password)
@@ -38,13 +38,13 @@ async def login_user(response: Response, user_data: SUserAuth):
     response.set_cookie("userpc_access_token", access_token, httponly=True)
     return "Пользователь вошёл", {"access_token": access_token}
 
-# Эндпоинт для выхода пользователя
+# Роутер для выхода пользователя
 @router.post("/logout")
 async def logout_user(response: Response):
     response.delete_cookie("userpc_access_token")
     return "Пользователь вышел"
 
-# Эндпоинт выводит информацию о пользователе
+# Роутер выводит информацию о пользователе
 @router.get("/me")
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user

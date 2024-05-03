@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class SUserPc(BaseModel):
     id: int
+    name: str
     user_id: int
     price: int
 

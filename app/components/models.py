@@ -7,7 +7,7 @@ class Component(Base):
     __tablename__ = "component"
 
     id = Column(Integer, primary_key=True)
-    type = Column(Enum('cpu', 'gpu', 'md','ram', 'memory', 'power', 'cooler', 'case', name='component_types'), nullable=False)
+    type = Column(Enum('cpu', 'gpu', 'mb', 'ram', 'memory', 'power', 'cooler', 'case', name='component_types'), nullable=False)
     name = Column(String, nullable=False)
     price = Column(String, nullable=False)
     description = Column(String)
