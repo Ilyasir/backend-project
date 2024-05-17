@@ -9,7 +9,7 @@ class Component(Base):
     id = Column(Integer, primary_key=True)
     type = Column(Enum('cpu', 'gpu', 'mb', 'ram', 'memory', 'power', 'cooler', 'case', name='component_types'), nullable=False)
     name = Column(String, nullable=False)
-    price = Column(String, nullable=False)
+    price = Column(Integer, nullable=False)
     description = Column(String)
     image_path = Column(String)
     characteristic = relationship("Characteristic", back_populates="component")

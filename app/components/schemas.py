@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
+from typing import Optional
 
 class TypeComponent(str, Enum):
     cpu = "cpu"
@@ -17,7 +18,7 @@ class SComponent(BaseModel):
     name: str
     description: str
     price: int
-    image_path: str
+    image_path: Optional[str] = None
 
     class Config:
         orm_mode = True
