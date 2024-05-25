@@ -4,6 +4,9 @@ from typing import Optional
 from app.components.service import ComponentService
 from app.components.schemas import SComponent, STypeComponent, SComponentUpdate
 from app.components.characteristics.service import CharacteristicService
+from app.components.reviews.schemas import SReview
+from app.components.reviews.service import ReviewService
+
 from app.exсeptions import ComponentAlreadyExistsExeption, ComponentNotFound
 
 router = APIRouter(
@@ -76,3 +79,9 @@ async def delete_component(component_id: int):
 @router.get("/component/{component_id}/characteristics")
 async def get_characteristics(component_id: int):
     return await CharacteristicService.get_characteristics(component_id=component_id)
+
+# Роутер выводит отзывы о компоненте по id компонента
+@router.get("/component/{component_id}/reviews", response_model=list[SReview])
+async def get_reviews(component_id: int):
+    reviews = await ReviewService.get_reviews_for_component(component_id)
+    return reviews

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Enum
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.components.characteristics.models import Characteristic
+from app.components.reviews.models import Review
 
 class Component(Base):
     __tablename__ = "component"
@@ -12,4 +13,5 @@ class Component(Base):
     price = Column(Integer, nullable=False)
     description = Column(String)
     image_path = Column(String)
-    characteristic = relationship("Characteristic", back_populates="component")
+    characteristic = relationship("Characteristic", back_populates="component", cascade="all, delete-orphan")
+    reviews = relationship("Review", back_populates="component", cascade="all, delete-orphan")

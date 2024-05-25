@@ -5,6 +5,11 @@ UserAlreadyExistsException = HTTPException(
     detail="Пользователь уже существует",                      
 )
 
+UserAlreadyReviewed = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Пользователь уже оставил отзыв",
+)
+
 IncorrectEmailOrPasswordException = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Неверная почта или пароль",

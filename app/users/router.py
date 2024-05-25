@@ -3,6 +3,8 @@ from fastapi import APIRouter, Response, Depends
 from app.users.schemas import SUserAuth
 from app.users.schemas import SUserReg
 from app.users.service import UsersService
+from app.components.reviews.service import ReviewService
+from app.components.reviews.schemas import SReview
 from app.users.auth import get_password_hash
 from app.users.auth import authenticate_user
 from app.users.auth import create_access_token
@@ -48,3 +50,8 @@ async def logout_user(response: Response):
 @router.get("/me")
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+# Роутер выводит все отзывы пользователя
+@router.get("/me/reviews")
+async def get_user_reviews(user: User = Depends(get_current_user)) -> list[SReview]:
+    return await ReviewService.find_all(user_id=user.id)
