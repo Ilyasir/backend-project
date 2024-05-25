@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from enum import Enum
-from typing import Optional
+from typing import Optional, Dict
 
-class TypeComponent(str, Enum):
+class STypeComponent(str, Enum):
     cpu = "cpu"
     gpu = "gpu"
     mb = "mb"
@@ -12,11 +12,22 @@ class TypeComponent(str, Enum):
     cooler = "cooler"
     case = "case"
 
+class SComponentUpdate(BaseModel):
+    type: Optional[STypeComponent]
+    name: Optional[str]
+    description: Optional[str]
+    price: Optional[int]
+    image_path: Optional[str]
+    characteristics: Optional[Dict[str, str]]
+
+    class Config:
+        orm_mode = True
+
 class SComponent(BaseModel):
     id: int
-    type: TypeComponent
+    type: STypeComponent
     name: str
-    description: str
+    description: Optional[str]
     price: int
     image_path: Optional[str] = None
 

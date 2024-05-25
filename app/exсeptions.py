@@ -28,3 +28,13 @@ IncorrectTokenFormatException = HTTPException(
 UserIsNotInToken =  HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
 )
+
+ComponentAlreadyExistsExeption = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Компонент уже существует",
+)
+
+ComponentNotFound = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="Компонент не найден",
+)
