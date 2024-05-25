@@ -20,5 +20,12 @@ proxys = [
         'https': 'socks5://SXtsLD:Qg8PP6@185.126.84.178:8000',
         'no_proxy': 'localhost,127.0.0.1'
     }
+},
+{
+    'proxy': {
+        'http': 'socks5://5tYJSh:UCbnep@176.124.45.30:8000',
+        'https': 'socks5://5tYJSh:UCbnep@176.124.45.30:8000',
+        'no_proxy': 'localhost,127.0.0.1'
+    }
 }
 ]
