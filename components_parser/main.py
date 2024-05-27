@@ -1,3 +1,13 @@
+#
+# Основная проблема данного парсера в том, что он работает быстро, из-за этого сайт nix.ru спустя какое-то количество
+# запросов перестает подгружать цены, потом перестает подгружать картинки и в конце концов полностью не грузится.
+# Чтобы хоть как-то это решить было добавлено 4 прокси сервера, чтобы менять IP браузера по ходу парсинга и задержка
+# между запросами.
+#
+# TODO:
+# провести рефакторинг в функции parser
+#
+
 # Библиотеки
 import time
 import requests
@@ -6,10 +16,9 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 from urls import urls
 import proxy
-import random
-from requests import exceptions
 
-# Исключения
+# Исключения - ключевые слова в названии компонента, который нам не нужен.
+# Включения - ключевые слова в названии компонента, который нам нужен.
 CPU_Exceptions = ["Xeon", "LGA1155", "EPYC"]
 GPU_Exceptions = ["планка", "Плата синхронизации", "SLI HB BRIDGE", "Intel Arc", "GT 710", "GT 220", "GT 210", "Профессиональный видеоускоритель", "Supermicro", "Sapphire"]
 RAM_Exceptions = ["Registered", "ECC", "SO-DIMM DDR5", "LRDIMM DDR4", "SO-DIMM DDR4", "LV Registered DDR3"]
@@ -20,6 +29,10 @@ CASE_Exceptions = ["Корзина", "Крепление", "панель", "Де
 
 
 def add_to_db(component):
+    """
+    Добавляет компонент в файл components.txt, который по сути является большим массивом со всеми компонентами.
+    Далее эти компоненты будут загружаться в базу данных.
+    """
     file = open("components.txt", "a")
     file.write("{\n")
     for key, value in component.items():
@@ -32,25 +45,27 @@ def add_to_db(component):
 
 
 def parser(url: str, find_what: str, component_id: int):
+    """
+    Отправляет запрос сайту, получает html, из которого затем извлекаются компоненты.
+    Определяет компонент какого типа сейчас парсится и вызывает соответствующую функцию.
+    """
     options = webdriver.ChromeOptions()
     # options.add_argument("--headless")
-    driver = webdriver.Chrome(seleniumwire_options=proxy.proxys[3] ,options=options)
+    driver = webdriver.Chrome(seleniumwire_options=proxy.proxys[3], options=options)
     driver.get(url)
     soup = BeautifulSoup(driver.page_source, "html.parser")
     items = soup.find_all("a", class_="t")  # Ищем все позиции комплектующих данного типа
     for item in items:
-        time.sleep(5)
+        time.sleep(5)  # Задержка между запросами
         spec_url = "https://www.nix.ru" + item["href"]  # Страница с конкретным элементом
         driver.set_page_load_timeout(15)
         try:
             driver.get(spec_url)
         except TimeoutException:
             continue
-        # Время для загрузки цены
-        time.sleep(6)
+        time.sleep(6)  # Задержка между запросами
         soup_info = BeautifulSoup(driver.page_source, "html.parser")
-        # Контейнер с изображениями
-        container = soup_info.find_all("span", class_="carousel-content")
+        container = soup_info.find_all("span", class_="carousel-content")  # Контейнер с изображениями
         # Если контейнера нет - изображение только одно
         if len(container) == 0:
             images = [soup_info.find_all("img", id="main_photo")[0]["src"]]
@@ -60,18 +75,21 @@ def parser(url: str, find_what: str, component_id: int):
                 if img["href"] != "":
                     images.append(img["href"])
                     break
+        # Если изображений нет - пропускаем
         if images[0] == "https://static.nix.ru/art/picture_coming_soon.gif":
             continue
-        image = images[0]
+        # Сохраняем первое изображение
         try:
-            img = requests.get(image)
+            img = requests.get(images[0], proxies=proxy.proxys[3])
             img_file = open('../app/images/{}.jpg'.format(component_id), 'wb')
             img_file.write(img.content)
             img_file.close()
         except requests.exceptions.InvalidSchema:
             pass
         except requests.exceptions.ConnectionError:
-            print("error")
+            pass
+        # Переход в соответствующие функции парсинга характеристик
+        # Проверка исключений и включений, если они есть
         match find_what:
             case "CPU":
                 for exception in CPU_Exceptions:
@@ -96,15 +114,12 @@ def parser(url: str, find_what: str, component_id: int):
             case "RAM":
                 for exception in RAM_Exceptions:
                     if exception in item.get_text():
-                        print("skip")
                         break
                 else:
                     ram = ram_info_parser(soup_info, component_id)
                     if ram == 0:
-                        print("OPACHKI")
                         continue
                     add_to_db(ram)
-                    print("add")
                     component_id += 1
             case "MB":
                 for exception in MB_Exceptions:
@@ -113,7 +128,6 @@ def parser(url: str, find_what: str, component_id: int):
                 else:
                     mb = mb_info_parser(soup_info, component_id)
                     if mb == 0:
-                        print("OPACHKI")
                         continue
                     add_to_db(mb)
                     component_id += 1
@@ -123,7 +137,6 @@ def parser(url: str, find_what: str, component_id: int):
             case "POWER":
                 power = power_info_parser(soup_info, component_id)
                 if power == 0:
-                    print("OPACHKI")
                     continue
                 add_to_db(power)
                 component_id += 1
@@ -134,7 +147,6 @@ def parser(url: str, find_what: str, component_id: int):
                 else:
                     hdd = hdd_info_parser(soup_info, component_id)
                     if hdd == 0:
-                        print("opana")
                         continue
                     add_to_db(hdd)
                     component_id += 1
@@ -146,12 +158,19 @@ def parser(url: str, find_what: str, component_id: int):
                     if exception in item.get_text():
                         break
                 else:
-                    add_to_db(case_info_parser(soup_info, component_id))
+                    case = case_info_parser(soup_info, component_id)
+                    if case == 0:
+                        continue
+                    add_to_db(case)
                     component_id += 1
             case "FAN":
-                add_to_db(fan_info_parser(soup_info, component_id))
+                fan = fan_info_parser(soup_info, component_id)
+                if fan == 0:
+                    continue
+                add_to_db(fan)
                 component_id += 1
     return component_id
+
 
 def cpu_info_parser(soup_info, id):
     info = {}
@@ -227,8 +246,8 @@ def gpu_info_parser(soup_info, id):
 
 def ram_info_parser(soup_info, id):
     info = {}
-    info["Manufacturer"] = soup_info.find("td", id="tdsa2943").get_text().strip()
     try:
+        info["Manufacturer"] = soup_info.find("td", id="tdsa2943").get_text().strip()
         info["Series"] = soup_info.find("td", id="tdsa5562").get_text().strip()
         info["Model"] = soup_info.find("td", id="tdsa2944").get_text().strip()
         # info["Price"] = soup_info.find("div", class_="price pc-component-non-used pc-component-inactive").find_all("span")[1].get_text().replace("\xa0","")[:-4]
@@ -342,6 +361,7 @@ def power_info_parser(soup_info, id):
     full["characters"] = info
     return full
 
+
 def hdd_info_parser(soup_info, id):
     info = {}
     try:
@@ -371,20 +391,26 @@ def hdd_info_parser(soup_info, id):
     full["characters"] = info
     return full
 
+
 def case_info_parser(soup_info, id):
     info = {}
-    info["Manufacturer"] = soup_info.find("td", id="tdsa2943").get_text().strip()
-    check_series = soup_info.find_all("td", id="tdsa5562")
-    info["Series"] = soup_info.find("td", id="tdsa5562").get_text().strip() if len(check_series) > 0 else "No"
-    info["Model"] = soup_info.find("td", id="tdsa2944").get_text().strip()[:-20]
-    info["Price"] = soup_info.find("div", class_="price pc-component-non-used pc-component-inactive").find_all("span")[1].get_text().replace("\xa0", "")[:-4]
-    format = soup_info.find("td", id="tdsa643").get_text().strip()
-    if format[:3] == "ATX":
-        info["Format"] = "ATX"
-    elif format[:5] == "E-ATX":
-        info["Format"] = "E-ATX"
-    elif format[:8] == "MicroATX":
-        info["Format"] = "MicroATX"
+    try:
+        info["Manufacturer"] = soup_info.find("td", id="tdsa2943").get_text().strip()
+        check_series = soup_info.find_all("td", id="tdsa5562")
+        info["Series"] = soup_info.find("td", id="tdsa5562").get_text().strip() if len(check_series) > 0 else "No"
+        info["Model"] = soup_info.find("td", id="tdsa2944").get_text().strip()[:-20]
+        info["Price"] = soup_info.find("div", class_="price pc-component-non-used pc-component-inactive").find_all("span")[1].get_text().replace("\xa0", "")[:-4]
+        format = soup_info.find("td", id="tdsa643").get_text().strip()
+        if format[:3] == "ATX":
+            info["Format"] = "ATX"
+        elif format[:5] == "E-ATX":
+            info["Format"] = "E-ATX"
+        elif format[:8] == "MicroATX":
+            info["Format"] = "MicroATX"
+        else:
+            return 0
+    except AttributeError:
+        return 0
 
     full = {}
     full["id"] = id
@@ -398,15 +424,19 @@ def case_info_parser(soup_info, id):
     full["characters"] = info
     return full
 
+
 def fan_info_parser(soup_info, id):
     info = {}
-    info["Manufacturer"] = soup_info.find("td", id="tdsa2943").get_text().strip()
-    check_series = soup_info.find_all("td", id="tdsa5562")
-    info["Series"] = soup_info.find("td", id="tdsa5562").get_text().strip() if len(check_series) > 0 else "No"
-    info["Model"] = soup_info.find("td", id="tdsa2944").get_text().strip()
-    info["Price"] = soup_info.find("div", class_="price pc-component-non-used pc-component-inactive").find_all("span")[1].get_text().replace("\xa0", "")[:-4]
-    info["Socket"] = soup_info.find("td", id="tdsa2118").get_text().strip()
-    info["Capacity"] = soup_info.find("td", id="tdsa1754").get_text().strip()
+    try:
+        info["Manufacturer"] = soup_info.find("td", id="tdsa2943").get_text().strip()
+        check_series = soup_info.find_all("td", id="tdsa5562")
+        info["Series"] = soup_info.find("td", id="tdsa5562").get_text().strip() if len(check_series) > 0 else "No"
+        info["Model"] = soup_info.find("td", id="tdsa2944").get_text().strip()
+        info["Price"] = soup_info.find("div", class_="price pc-component-non-used pc-component-inactive").find_all("span")[1].get_text().replace("\xa0", "")[:-4]
+        info["Socket"] = soup_info.find("td", id="tdsa2118").get_text().strip()
+        info["Capacity"] = soup_info.find("td", id="tdsa1754").get_text().strip()
+    except AttributeError:
+        return 0
 
     full = {}
     full["id"] = id
@@ -422,7 +452,7 @@ def fan_info_parser(soup_info, id):
 
 
 if __name__ == "__main__":
-    component_id = 1489
-    # CPU, GPU, RAM, MB, SSD, POWER, _HDD, CASE, FAN
-    print("POWER")
-    parser(url=urls["HDD"], find_what="HDD", component_id=component_id)
+    component_id = 2160
+    # CPU, GPU, RAM, MB, SSD, POWER, HDD, CASE, _FAN
+    component_type = "FAN"
+    parser(url=urls[component_type], find_what=component_type, component_id=component_id)
