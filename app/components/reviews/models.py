@@ -7,7 +7,7 @@ class Review(Base):
 
     id = Column(Integer, primary_key=True)
     component_id = Column(Integer, ForeignKey('component.id', ondelete='CASCADE'), nullable=False)
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete="SET NULL"), nullable=True)
     rating = Column(Integer, nullable=False)
     comment = Column(String, nullable=True)
 

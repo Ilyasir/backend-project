@@ -4,7 +4,7 @@ from typing import Optional
 class SReview(BaseModel):
     id: int
     component_id: int
-    user_id: int
+    user_id: Optional[int] = None
     rating: int = Field(le=5, ge=1)
     comment: Optional[str] = None
 

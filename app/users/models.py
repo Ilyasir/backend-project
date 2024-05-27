@@ -10,4 +10,4 @@ class User(Base):
     email = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
     user_pc = relationship("UserPc", back_populates="user")
-    reviews = relationship('Review', back_populates='user', cascade='all, delete-orphan')
+    reviews = relationship('Review', back_populates='user', passive_deletes=True)
