@@ -57,7 +57,7 @@ async def add_component(
     return component
 
 # Роутер обновляет компонент и его характеристики
-@router.put("/component/{component_id}", response_model=SComponent)
+@router.put("/{component_id}", response_model=SComponent)
 async def update_component(component_id: int, component: SComponentUpdate):
     existing_component = await ComponentService.find_one_or_none(id=component_id)
     if not existing_component:
@@ -67,7 +67,7 @@ async def update_component(component_id: int, component: SComponentUpdate):
     return await ComponentService.update_component(component_id, component_data, characteristics_data)
 
 # Роутер удаляет компонент и его характеристики
-@router.delete("/component/{component_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{component_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_component(component_id: int):
     existing_component = await ComponentService.find_one_or_none(id=component_id)
     if not existing_component:
@@ -76,12 +76,12 @@ async def delete_component(component_id: int):
     return {"detail": "Компонент удален"}
 
 # Роутер выводит характеристики компонента по id компонента
-@router.get("/component/{component_id}/characteristics")
+@router.get("/{component_id}/characteristics")
 async def get_characteristics(component_id: int):
     return await CharacteristicService.get_characteristics(component_id=component_id)
 
 # Роутер выводит отзывы о компоненте по id компонента
-@router.get("/component/{component_id}/reviews", response_model=list[SReview])
+@router.get("/{component_id}/reviews", response_model=list[SReview])
 async def get_reviews(component_id: int):
     reviews = await ReviewService.get_reviews_for_component(component_id)
     return reviews
