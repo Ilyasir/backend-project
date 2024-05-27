@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, status
 from typing import Optional
 
 from app.components.service import ComponentService
-from app.components.schemas import SComponent, STypeComponent, SComponentUpdate
+from app.components.schemas import SComponent, STypeComponent, SComponentUpdate, STypeSort
 from app.components.characteristics.service import CharacteristicService
 from app.components.reviews.schemas import SReview
 from app.components.reviews.service import ReviewService
@@ -19,9 +19,9 @@ router = APIRouter(
 async def filter_components(
     type_component: STypeComponent,
     characteristics: dict[str, str],
+    order: STypeSort,
     min_price: int = Query(None, ge=0),
     max_price: int = Query(None, ge=0),
-    order: int = Query(1, ge=1, le=2),
     page: int = Query(0, ge=0),
     size: int = Query(10, ge=1, le=100)
 ):

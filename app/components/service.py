@@ -1,9 +1,10 @@
 from app.services.base import BaseService
 from app.components.models import Component
 from app.components.characteristics.models import Characteristic
+from app.components.reviews.models import Review
 from app.database import async_session_maker
 from sqlalchemy.orm import aliased, joinedload
-from sqlalchemy import select, asc, desc, update, delete
+from sqlalchemy import select, asc, desc, update, delete, func
 
 class ComponentService(BaseService):
     model = Component
@@ -42,13 +43,28 @@ class ComponentService(BaseService):
             if max_price is not None:
                 query = query.where(cls.model.price <= max_price)
 
-            if order == 1:
+            # Определяет метод сортировки
+            if order == "1":
                 query = query.order_by(asc(cls.model.price))
-            elif order == 2:
+            elif order == "2":
                 query = query.order_by(desc(cls.model.price))
+            elif order == "3":
+                review_count_subquery = (
+                    select(Review.component_id, func.count(Review.id).label("review_count"))
+                    .group_by(Review.component_id)
+                    .subquery()
+                )
+                query = query.outerjoin(review_count_subquery, cls.model.id == review_count_subquery.c.component_id)
+                query = query.order_by(desc(review_count_subquery.c.review_count))
+            elif order == "4":
+                avg_rating = func.avg(Review.rating).label('avg_rating')
+                query = query.outerjoin(Review).group_by(cls.model.id).order_by(desc(avg_rating).nulls_last())
+            elif order == "5":
+                avg_rating = func.avg(Review.rating).label('avg_rating')
+                query = query.outerjoin(Review).group_by(cls.model.id).order_by(asc(avg_rating).nulls_last())
 
             result = await session.execute(query)
-            components = result.unique().scalars().all()  # Используем unique() для удаления дубликатов
+            components = result.unique().scalars().all()
 
             # Добавим характеристики к каждому компоненту
             for component in components:

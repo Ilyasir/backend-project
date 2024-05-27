@@ -12,6 +12,13 @@ class STypeComponent(str, Enum):
     cooler = "cooler"
     case = "case"
 
+class STypeSort(str, Enum):
+    price_asc = "1"
+    price_desc = "2"
+    num_reviews = "3"
+    rating_asc = "4"
+    rating_desc = "5"
+
 class SComponentUpdate(BaseModel):
     type: Optional[STypeComponent]
     name: Optional[str]
