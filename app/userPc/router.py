@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi_cache.decorator import cache
 
 from app.userPc.service import UserPcService
 from app.userPc.schemas import SUserPc
@@ -16,5 +17,6 @@ async def get_pc(pc_id: int) -> SUserPc:
 
 # Роутер выводит все PC пользователя
 @router.get("")
+@cache(expire=60)
 async def get_user_pcs(user: User = Depends(get_current_user)) -> list[SUserPc]:
     return await UserPcService.find_all(user_id=user.id)

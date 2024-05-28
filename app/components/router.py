@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Query, status
+from fastapi_cache.decorator import cache
 from typing import Optional
 
 from app.components.service import ComponentService
@@ -77,11 +78,13 @@ async def delete_component(component_id: int):
 
 # Роутер выводит характеристики компонента по id компонента
 @router.get("/{component_id}/characteristics")
+@cache(expire=60)
 async def get_characteristics(component_id: int):
     return await CharacteristicService.get_characteristics(component_id=component_id)
 
 # Роутер выводит отзывы о компоненте по id компонента
 @router.get("/{component_id}/reviews", response_model=list[SReview])
+@cache(expire=60)
 async def get_reviews(component_id: int):
     reviews = await ReviewService.get_reviews_for_component(component_id)
     return reviews
